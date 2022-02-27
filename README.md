@@ -1,4 +1,6 @@
-#### PGSQL SQL Commands
+[Generate A Random Table](#generate-a-random-table)
+
+#### [Generate A Random Table](#generate-a-random-table)
 
 - Login Into GCP Console
 - Create PG SQL Instance
