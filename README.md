@@ -1,10 +1,10 @@
 [Generate A Random Table](#generate-a-random-table)
 
+[Compare JSON Values](#compare-json-values)
+
 <hr/>
 
 #### [Generate A Random Table](#generate-a-random-table)
-
-#### [Compare JSON Values](#compare-json-values)
 
 - Login Into GCP Console
 - Create PG SQL Instance
