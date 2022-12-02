@@ -2,6 +2,14 @@
 
 [Compare JSON Values](#compare-json-values)
 
+[Get Table Size](#get-table-size)
+
+[Fetch Running Queries Older Than 5 Minutes](#fetch-running-queries-older-than-5-minutes)
+
+[Clear PGSQL Locks](#clear-pgsql-locks)
+
+[PGSQL Settings](#pgsql-settings)
+
 <hr/>
 
 #### [Generate A Random Table](#generate-a-random-table)
@@ -201,4 +209,114 @@ postgres=> select (select value from table1 where key = 'k3') = (select value fr
 ----------
  f
 (1 row)
+```
+
+#### [Get Table Size](#get-table-size)
+
+```sql
+SELECT
+    relname AS "relation",
+    pg_size_pretty (
+        pg_total_relation_size (C .oid)
+    ) AS "total_size"
+FROM
+    pg_class C
+LEFT JOIN pg_namespace N ON (N.oid = C .relnamespace)
+    WHERE
+        nspname NOT IN (
+            'pg_catalog',
+            'information_schema'
+        )
+    AND C .relkind <> 'i'
+    AND nspname !~ '^pg_toast'
+    ORDER BY
+        pg_total_relation_size (C .oid) DESC;
+```
+
+#### [Fetch Running Queries Older Than 5 Minutes](#fetch-running-queries-older-than-5-minutes)
+
+```sql
+SELECT
+    pid,
+    now() - pg_stat_activity.query_start AS duration,
+    query,
+    state
+FROM pg_stat_activity
+    WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes';
+```
+
+#### [Clear PGSQL Locks](#clear-pgsql-locks)
+
+```sql
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid();
+```
+
+#### [PGSQL Settings](#pgsql-settings)
+
+```sql
+postgres=# select * from pg_settings where name = 'idle_session_timeout' \gx
+
+-[ RECORD 1 ]---+-------------------------------------------------------------------------------
+name            | idle_session_timeout
+setting         | 0
+unit            | ms
+category        | Client Connection Defaults / Statement Behavior
+short_desc      | Sets the maximum allowed idle time between queries, when not in a transaction.
+extra_desc      | A value of 0 turns off the timeout.
+context         | user
+vartype         | integer
+source          | default
+min_val         | 0
+max_val         | 2147483647
+enumvals        |
+boot_val        | 0
+reset_val       | 0
+sourcefile      |
+sourceline      |
+pending_restart | f
+
+select pg_reload_conf();
+
+postgres=# SHOW data_directory;
+
+       data_directory
+-----------------------------
+ /var/lib/postgresql/14/main
+(1 row)
+
+sudo -u postgres psql -c "SELECT version();"
+```
+
+#### Stored Procedure
+
+```sql
+create or replace procedure public.refresh_table_matviews()
+LANGUAGE plpgsql as
+$$ begin
+    REFRESH MATERIALIZED VIEW CONCURRENTLY public.table1;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY public.table2;
+    commit;
+end $$;
+```
+
+#### Stored Procedure Definition
+
+```sql
+\df+ refresh_table_matviews
+```
+
+#### CRON Job
+
+```sql
+CREATE EXTENSION pg_cron;
+
+GRANT USAGE ON SCHEMA cron TO postgres;
+
+select * from cron.job;
+
+SELECT * FROM cron.job_run_details;
+
+select cron.schedule('job_01', '*/10 * * * *','CALL public.refresh_table_matviews();');
+
+SELECT cron.unschedule(7); -- unschedule cron-job with jobid=7
 ```
