@@ -4,6 +4,8 @@
 
 #### [Generate A Random Table](#generate-a-random-table)
 
+#### [Compare JSON Values](#compare-json-values)
+
 - Login Into GCP Console
 - Create PG SQL Instance
 - Create a Database (Ex: `test-db`)
@@ -93,4 +95,110 @@ test-db=> select * from t_random limit 10;
         321 |   0.637456665167111 | 5522e09f9a97abd695bf821ce1eca750
         896 |  0.9731822082784944 | 34726f12c5bae77be4b3bb0293ccb38a
 (10 rows)
+```
+
+#### [Compare JSON Values](#compare-json-values)
+
+```sql
+postgres=> create table table1 ( key text NOT NULL , value jsonb NOT NULL );
+
+CREATE TABLE
+
+postgres=> \d
+         List of relations
+ Schema |  Name  | Type  |  Owner
+--------+--------+-------+----------
+ public | table1 | table | postgres
+(1 row)
+
+postgres=> \d table1
+
+              Table "public.table1"
+ Column | Type  | Collation | Nullable | Default
+--------+-------+-----------+----------+---------
+ key    | text  |           | not null |
+ value  | jsonb |           | not null |
+
+postgres=> insert into table1 values ( 'k1' , '{"x":11, "y":22}');
+INSERT 0 1
+
+postgres=> select * from table1;
+
+ key |       value
+-----+--------------------
+ k1  | {"x": 11, "y": 22}
+(1 row)
+
+postgres=> insert into table1 values ( 'k2' , '{"y":22, "x":11}');
+INSERT 0 1
+
+postgres=> select * from table1;
+ key |       value
+-----+--------------------
+ k1  | {"x": 11, "y": 22}
+ k2  | {"x": 11, "y": 22}
+(2 rows)
+
+postgres=> select value from table1 where key = 'k1';
+
+       value
+--------------------
+ {"x": 11, "y": 22}
+(1 row)
+
+postgres=> select (select value from table1 where key = 'k1') = (select value from table1 where key = 'k2');
+ ?column?
+----------
+ t
+(1 row)
+```
+
+```sql
+postgres=> insert into table1 values ( 'k3' , '{"x":11, "y":22, "x1":[1,2] , "y1":[3,4]}');
+INSERT 0 1
+
+postgres=> insert into table1 values ( 'k4' , '{"y":22, "x":11, "x1":[1,2] , "y1":[3,4]}');
+INSERT 0 1
+
+postgres=> select * from table1;
+
+ key |                     value
+-----+------------------------------------------------
+ k1  | {"x": 11, "y": 22}
+ k2  | {"x": 11, "y": 22}
+ k3  | {"x": 11, "y": 22, "x1": [1, 2], "y1": [3, 4]}
+ k4  | {"x": 11, "y": 22, "x1": [1, 2], "y1": [3, 4]}
+(4 rows)
+
+postgres=> select (select value from table1 where key = 'k3') = (select value from table1 where key = 'k4');
+ ?column?
+----------
+ t
+(1 row)
+
+postgres=> insert into table1 values ( 'k5' , '{"y":22, "x":11, "x1":[1,2] , "y1":[3,4], "z" : "1234" }');
+INSERT 0 1
+
+postgres=> select * from table1;
+ key |                            value
+-----+-------------------------------------------------------------
+ k1  | {"x": 11, "y": 22}
+ k2  | {"x": 11, "y": 22}
+ k3  | {"x": 11, "y": 22, "x1": [1, 2], "y1": [3, 4]}
+ k4  | {"x": 11, "y": 22, "x1": [1, 2], "y1": [3, 4]}
+ k5  | {"x": 11, "y": 22, "z": "1234", "x1": [1, 2], "y1": [3, 4]}
+(5 rows)
+
+
+postgres=> select (select value from table1 where key = 'k3') = (select value from table1 where key = 'k4');
+ ?column?
+----------
+ t
+(1 row)
+
+postgres=> select (select value from table1 where key = 'k3') = (select value from table1 where key = 'k5');
+ ?column?
+----------
+ f
+(1 row)
 ```
