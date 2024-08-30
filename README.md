@@ -10,6 +10,8 @@
 
 [PGSQL Settings](#pgsql-settings)
 
+[Foreign Data Wrapper](#foreign-data-wrapper)
+
 <hr/>
 
 #### [Generate A Random Table](#generate-a-random-table)
@@ -319,4 +321,47 @@ SELECT * FROM cron.job_run_details;
 select cron.schedule('job_01', '*/10 * * * *','CALL public.refresh_table_matviews();');
 
 SELECT cron.unschedule(7); -- unschedule cron-job with jobid=7
+```
+
+#### [Foreign Data Wrapper](#foreign-data-wrapper)
+
+```sql
+-- First, you need to install and enable the postgres_fdw extension on the PostgreSQL database 
+-- where you want to create the foreign tables.
+
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+
+-- Next, create a foreign server object that defines the connection information for the remote PostgreSQL server.
+
+CREATE SERVER remote_server
+FOREIGN DATA WRAPPER postgres_fdw
+OPTIONS (host 'remote_host', port '5432', dbname 'remote_db');
+
+-- Create a user mapping that links a local PostgreSQL role to a remote PostgreSQL role, 
+-- specifying the credentials to use for the remote connection.
+
+CREATE USER MAPPING FOR local_user
+SERVER remote_server
+OPTIONS (user 'remote_user', password '<REDACTED>');
+
+-- You can import the schema from the remote database, which will create foreign tables in your 
+-- local database corresponding to tables in the remote database.
+
+IMPORT FOREIGN SCHEMA public
+FROM SERVER remote_server
+INTO local_schema;
+
+-- Optional:
+-- Alternatively, you can manually create foreign tables that map to specific tables in the remote database.
+
+CREATE FOREIGN TABLE local_table_name (
+    id INTEGER,
+    name TEXT
+)
+SERVER remote_server
+OPTIONS (schema_name 'remote_schema', table_name 'remote_table_name');
+
+-- You can now query the foreign table just like any other local table.
+
+SELECT * FROM local_table_name;
 ```
