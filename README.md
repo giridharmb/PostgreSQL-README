@@ -424,3 +424,16 @@ GROUP BY
 ORDER BY
     connection_count DESC;
 ```
+
+```sql
+SELECT
+    usename AS username,
+    client_addr,
+    count(*) AS connection_count
+FROM
+    pg_stat_activity
+GROUP BY
+    usename, client_addr
+ORDER BY
+    connection_count DESC;
+```
