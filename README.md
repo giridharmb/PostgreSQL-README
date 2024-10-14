@@ -12,6 +12,8 @@
 
 [Foreign Data Wrapper](#foreign-data-wrapper)
 
+[Monitor PostgreSQL Connections](#monitor-postgresql-connections)
+
 <hr/>
 
 #### [Generate A Random Table](#generate-a-random-table)
@@ -364,4 +366,49 @@ OPTIONS (schema_name 'remote_schema', table_name 'remote_table_name');
 -- You can now query the foreign table just like any other local table.
 
 SELECT * FROM local_table_name;
+```
+
+#### [Monitor PostgreSQL Connections](#monitor-postgresql-connections)
+
+```sql
+SELECT
+    pid,
+    usename,
+    application_name,
+    client_addr,
+    client_port,
+    state,
+    query,
+    backend_start
+FROM
+    pg_stat_activity
+ORDER BY
+    backend_start;
+```
+
+```sql
+SELECT count(*), client_addr
+FROM pg_stat_activity
+GROUP BY client_addr
+ORDER BY count DESC;
+```
+
+```bash
+sudo netstat -natp | grep postgres
+```
+
+```bash
+sudo ss -tnp | grep postgres
+```
+
+```sql
+SHOW max_connections;
+```
+
+```sql
+SELECT count(*) FROM pg_stat_activity;
+```
+
+```bash
+tail -f /var/log/postgresql/postgresql-<version>-main.log
 ```
