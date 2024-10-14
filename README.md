@@ -412,3 +412,15 @@ SELECT count(*) FROM pg_stat_activity;
 ```bash
 tail -f /var/log/postgresql/postgresql-<version>-main.log
 ```
+
+```sql
+SELECT
+    usename AS username,
+    count(*) AS connection_count
+FROM
+    pg_stat_activity
+GROUP BY
+    usename
+ORDER BY
+    connection_count DESC;
+```
