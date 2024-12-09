@@ -16,7 +16,9 @@
 
 > Source Table
 
-`SELECT * FROM `my-project.my_data_set.my_custom_table` LIMIT 1;`
+```sql
+SELECT * FROM `my-project.my_data_set.my_custom_table` LIMIT 1;
+```
 
 ---
 
