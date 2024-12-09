@@ -4,7 +4,7 @@
 
 > Reference : https://learn.microsoft.com/en-us/azure/virtual-machines/windows/scheduled-events
 
---
+---
 
 #### What Is The Idea Here ?
 
@@ -18,14 +18,14 @@
 
 `SELECT * FROM `my-project.my_data_set.my_custom_table` LIMIT 1;`
 
---
+---
 
 > Columns
 
 - `timestamp`
 - `event_data`
 
---
+---
 
 > Sample Row Value
 
@@ -106,7 +106,7 @@ Column : `event_data`
 }
 ```
 
---
+---
 
 #### Create BQ View From Table
 
@@ -203,7 +203,7 @@ FROM parsed_data;
 select * from `my-project.my_data_set.view_my_custom_table`;
 ```
 
---
+---
 
 #### Multicorn For PostgreSQL
 
@@ -211,7 +211,7 @@ select * from `my-project.my_data_set.view_my_custom_table`;
   - PostgreSQL >= 9.5 up to 14
   - Python >= 3.4
 
---
+---
 
 #### Install required packages
 
@@ -220,7 +220,7 @@ apt update
 apt install -y postgresql-server-dev-14 python3-setuptools python3-dev make gcc git
 ```
 
---
+---
 
 #### Multicorn FDW (Foreign Data Wrapper) Extension For PostgreSQL
 
@@ -243,13 +243,13 @@ make && make install
 pip3 install bigquery-fdw
 ```
 
---
+---
 
 ```bash
 GOOGLE_APPLICATION_CREDENTIALS = '/path/to/key.json'
 ```
 
---
+---
 
 ```sql
 CREATE EXTENSION multicorn;
@@ -268,7 +268,7 @@ OPTIONS (
 );
 ```
 
---
+---
 
 > If required*
 
@@ -309,7 +309,7 @@ OPTIONS (
 );
 ```
 
---
+---
 
 > If required*
 
@@ -349,7 +349,7 @@ FROM my_microsoft_events_table
 WITH NO DATA; -- Initially create empty, then refresh
 ```
 
---
+---
 
 > This combination will most likely gaurantee unique index
 
@@ -396,13 +396,13 @@ else
 fi
 ```
 
---
+---
 
 ```bash
 chmod +x refresh_mv.sh
 ```
 
---
+---
 
 ```bash
 # Edit crontab
